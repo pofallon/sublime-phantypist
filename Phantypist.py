@@ -7,12 +7,13 @@ import sublime, sublime_plugin, random
 
 class PhantypistCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
+		originalAutoIndent = self.view.settings().get("auto_indent")
+		self.view.settings().set("auto_indent", False)
 		text = sublime.get_clipboard()
-		sublime.set_timeout(lambda: self.output(text), 0)
+		sublime.set_timeout(lambda: self.output(text, originalAutoIndent), 0)
 
-	def output(self, text):
+	def output(self, text, originalAutoIndent):
 		t =  text[0]
-		point = self.view.sel()[0].begin()
 		self.view.run_command("insert", {"characters": t})
 		if len(text) > 1:
 			if t == ' ' and text[1] == ' ':
@@ -20,4 +21,6 @@ class PhantypistCommand(sublime_plugin.TextCommand):
 				nextTime = 0
 			else:
 				nextTime = random.randrange(50,300)
-			sublime.set_timeout(lambda: self.output(text[1:]), nextTime)
+			sublime.set_timeout(lambda: self.output(text[1:], originalAutoIndent), nextTime)
+		else:
+			self.view.settings().set("auto_indent", originalAutoIndent)
